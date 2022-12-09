@@ -1,4 +1,5 @@
-FROM php:7.4.15-apache
+FROM php:8.1.2-apache
+#FROM php:8.1.2-alpine
 ARG DEBIAN_FRONTEND=noninteractive
 RUN docker-php-ext-install mysqli
 # Include alternative DB driver
@@ -9,8 +10,7 @@ RUN apt-get update \
     && apt-get install -y libzip-dev \
     && apt-get install -y zlib1g-dev \
     && apt-get install -y libonig-dev \
-    && rm -rf /var/lib/apt/lists/* \
-    && docker-php-ext-install zip
+    && rm -rf /var/lib/apt/lists/* 
 
 RUN docker-php-ext-install mbstring
 RUN docker-php-ext-install zip
