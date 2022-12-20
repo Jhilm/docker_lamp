@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 04, 2022 at 04:36 PM
+-- Generation Time: Dec 06, 2022 at 09:33 PM
 -- Server version: 10.4.17-MariaDB
 -- PHP Version: 7.4.15
 
@@ -114,11 +114,17 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `DB_SP_Cargo_update` (IN `_CODCARGO`
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `DB_SP_Departamentos_add` (IN `_NOMBDEPARTAMENTO` VARCHAR(50), IN `_DESCRIPCION` VARCHAR(150), IN `_ESTADO` TINYINT)  BEGIN
-	IF _DESCRIPCION is null THEN
-    	INSERT INTO departamentos(NOMBDEPARTAMENTO, ESTADO)VALUES(_NOMBDEPARTAMENTO, _ESTADO);
-    ELSEIF _DESCRIPCION is not null THEN
-    	INSERT INTO departamentos(NOMBDEPARTAMENTO, DESCRIPCION, ESTADO)VALUES(_NOMBDEPARTAMENTO,_DESCRIPCION, _ESTADO);
-    END IF;
+	SET @validate = (SELECT COUNT(*) FROM departamentos WHERE NOMBDEPARTAMENTO=_NOMBDEPARTAMENTO);
+    	IF @validate > 0 THEN
+        	SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Departament name already exists';
+        ELSE
+        	IF _DESCRIPCION='' THEN
+            	INSERT INTO departamentos(NOMBDEPARTAMENTO,ESTADO)VALUES(_NOMBDEPARTAMENTO,_ESTADO);
+            ELSE
+        		INSERT INTO departamentos(NOMBDEPARTAMENTO,DESCRIPCION,ESTADO)VALUES(_NOMBDEPARTAMENTO,_DESCRIPCION,_ESTADO);
+                END IF;
+        END IF;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `DB_SP_Departamentos_delete` (IN `_CODDEPARTAMENTO` INT(11))  BEGIN
@@ -276,7 +282,8 @@ CREATE TABLE `activo` (
 --
 
 INSERT INTO `activo` (`CODACTIVO`, `NITPROVEEDOR`, `CODMODELO`, `DESCRIPCION`, `CODPROCEDENCIA`, `CODACTIVOFIJO`, `SERIE`, `ANIOFABRICACION`, `FECHAINGRESO`, `FOTOGRAFIA`, `FHREGSERV`, `FECHAMODIFICACION`, `USUARIOREGISTRO`, `ESTADOACTIVO`) VALUES
-(4, 'F1F1F1', 1, 'NUEVO', 1, '1', 'CDNSKCSDCKSJCKSJCLDSJ', 2050, '0002-12-09', 0x617474686f72742d73637265656e323032322d31312d32352d30303a32372d35372e6a7067, '2022-11-25 04:28:08', NULL, 1, 1);
+(4, 'F1F1F1', 1, 'NUEVO', 1, '1', 'CDNSKCSDCKSJCKSJCLDSJ', 2050, '0002-12-09', 0x617474686f72742d73637265656e323032322d31312d32352d30303a32372d35372e6a7067, '2022-11-25 04:28:08', NULL, 1, 1),
+(5, '1', 1, 'fg', 1, '1', '123456789', 2022, '2022-02-02', 0x303030303030303030303030303030303030303030303030303030303030303030303030303030302030303030303030303030303030303030303030303030303030303030303030303030303030303030203030303030303030303030303030303030303030303030303030303030303030303030303030303020303030303030303030303030303030303030303030303030303030303030303030303030303030302030303030303030303030303030303030303030303030303030303030303030303030303030303030203030303030303030313130303030303030303030303030303030303030303130303030303030303020313131313131313131313131313131313131313131313131313131313131313131313131313131312031313131313131313131313131313131313131313131313131313131313131313131313131313131203131313131313131313131313131313131313131313131313131313131313131313131313131313120313131313131313131313131313131313131313131313131313131313131313131313131313131312031313131313131313131313131313131313131313131313131313131313131313131313131313131203131313131313131313131313131313131313131313131313131313131313131313131313131313120313131313131313131313131313131313131313131313131313131313131313131313131313131312031313131313131313131313131313131313131313131313131313131313131313131313131313131203131313131313131313131313131313131313131313131313131313131313131313131313131313120313131313131313131313131313131313131313131313131313131313131313131313131313131312031313131313131313131313131313131313131313131313131313131313131313131313131313131203131313131313131313131313131313131313131313131313131313131313131313131313131313120313131313131313131313131313131313131313131313131313131313131313131313131313131312031313131313131313131313131313131313131313131313131313131313131313131313131313131, '2022-12-05 19:06:55', NULL, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -304,7 +311,7 @@ INSERT INTO `asigcargopersonal` (`CODASIGCARGOPER`, `CODCARGODEP`, `CODPERSONAL`
 (2, 2, 2, '2022-01-01', '2022-02-02', 1, 'AB-123', '2022-12-01 01:13:31'),
 (3, 3, 3, '2022-10-01', '2022-10-01', 1, 'DIR/01/2022', '2022-10-23 10:37:19'),
 (4, 4, 4, '2022-10-01', '2022-10-01', 1, 'DIR/01/2022', '2022-10-23 10:37:19'),
-(5, 5, 5, '2022-10-01', '2022-10-01', 1, 'DIR/01/2022', '2022-10-23 10:37:19'),
+(5, 5, 5, '2022-10-01', '2022-10-01', 0, 'DIR/01/2022', '2022-12-05 20:18:05'),
 (6, 6, 6, '2022-10-01', '2022-10-01', 1, 'DIR/01/2022', '2022-10-23 10:37:19'),
 (7, 7, 7, '2022-10-01', '2022-10-01', 1, 'DIR/01/2022', '2022-10-23 10:37:19'),
 (8, 8, 8, '2022-10-01', '2022-10-01', 1, 'DIR/01/2022', '2022-10-24 15:32:58'),
@@ -366,14 +373,14 @@ INSERT INTO `cargo` (`CODCARGO`, `CODDEPARTAMENTO`, `CARGO`, `ESTADO`) VALUES
 (2, 2, 'ADMINISTRADOR', 1),
 (3, 3, 'ASESOR LEGAL', 1),
 (4, 4, 'AUDITOR', 1),
-(5, 5, 'GESTOR DE CALIDAD', 1),
+(5, 5, 'GESTOR DE CALIDAD', 0),
 (6, 6, 'JEFE DE LABORATORIO', 1),
 (7, 7, 'JEFE DE FARMACIA', 1),
 (8, 8, 'JEFE DE SISTEMAS', 1),
 (9, 8, 'AUXILIAR DE SISTEMAS', 1),
 (10, 9, 'AUXILIAR DE BIOMEDICA', 1),
-(11, 9, 'TECNICO BIOMEDICO', 1),
-(15, 1, 'Encargado', 1);
+(11, 9, 'TECNICO BIOMEDICO', 0),
+(15, 1, 'ENCARGADO', 0);
 
 --
 -- Triggers `cargo`
@@ -460,6 +467,21 @@ CREATE TABLE `cronogramapreventivo` (
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `DB_VIEW_ActivoAll_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `DB_VIEW_ActivoAll_view` (
+`CLASE` varchar(50)
+,`MARCA` varchar(50)
+,`MODELO` varchar(50)
+,`PROCEDENCIA` varchar(50)
+,`FOTOGRAFIA` longblob
+,`ANIOFABRICACION` int(11)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Stand-in structure for view `DB_VIEW_Activo_view`
 -- (See below for the actual view)
 --
@@ -483,6 +505,22 @@ CREATE TABLE `DB_VIEW_Activo_view` (
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `DB_VIEW_AsigCargoPersonalAll_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `DB_VIEW_AsigCargoPersonalAll_view` (
+`CODASIGCARGOPER` int(11)
+,`CODCARGODEP` int(11)
+,`CODPERSONAL` int(11)
+,`FECHAASIGNACION` date
+,`FECHACONCLUCION` date
+,`ESTADO` tinyint(1)
+,`MEMODESIGNACION` varchar(30)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Stand-in structure for view `DB_VIEW_AsigCargoPersonal_view`
 -- (See below for the actual view)
 --
@@ -495,6 +533,19 @@ CREATE TABLE `DB_VIEW_AsigCargoPersonal_view` (
 ,`ESTADO` tinyint(1)
 ,`MEMODESIGNACION` varchar(30)
 ,`FHREGSERV` timestamp
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `DB_VIEW_CargoAlll_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `DB_VIEW_CargoAlll_view` (
+`CODCARGO` int(11)
+,`CODDEPARTAMENTO` int(11)
+,`CARGO` varchar(50)
+,`ESTADO` tinyint(1)
 );
 
 -- --------------------------------------------------------
@@ -543,6 +594,19 @@ CREATE TABLE `DB_VIEW_Claseactivo_view` (
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `DB_VIEW_DepartamentosAll_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `DB_VIEW_DepartamentosAll_view` (
+`CODDEPARTAMENTO` int(11)
+,`NOMBDEPARTAMENTO` varchar(50)
+,`DESCRIPCION` varchar(150)
+,`ESTADO` tinyint(1)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Stand-in structure for view `DB_VIEW_Departamentos_view`
 -- (See below for the actual view)
 --
@@ -571,6 +635,21 @@ CREATE TABLE `DB_VIEW_Item_Available_view` (
 --
 CREATE TABLE `DB_VIEW_Item_view` (
 `CODITEM` varchar(20)
+,`ESTADO` tinyint(1)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `DB_VIEW_PersonalAll_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `DB_VIEW_PersonalAll_view` (
+`CODPERSONAL` int(11)
+,`CODITEM` varchar(20)
+,`CI` varchar(20)
+,`FECHAASIGNACION` date
+,`FECHADESASIGNACION` date
 ,`ESTADO` tinyint(1)
 );
 
@@ -670,7 +749,7 @@ CREATE TABLE `departamentos` (
 
 INSERT INTO `departamentos` (`CODDEPARTAMENTO`, `NOMBDEPARTAMENTO`, `DESCRIPCION`, `ESTADO`) VALUES
 (1, 'DIRECCION', 'Nuevo departamento', 0),
-(2, 'ADMINITRACION', NULL, 1),
+(2, 'ADMINISTRACION', NULL, 1),
 (3, 'ASESORIAL LEGAL', NULL, 1),
 (4, 'AUDITORIA', NULL, 1),
 (5, 'GESTION CALIDAD', NULL, 1),
@@ -678,21 +757,9 @@ INSERT INTO `departamentos` (`CODDEPARTAMENTO`, `NOMBDEPARTAMENTO`, `DESCRIPCION
 (7, 'FARMACIA', NULL, 1),
 (8, 'SISTEMAS', NULL, 1),
 (9, 'BIOMEDICA', NULL, 1),
-(48, 'MANTENIMIENTO', 'DPTO de mantenimiento de software y hardware', 0);
-
---
--- Triggers `departamentos`
---
-DELIMITER $$
-CREATE TRIGGER `departamentos_add` BEFORE INSERT ON `departamentos` FOR EACH ROW BEGIN
-if new.DESCRIPCION IS null THEN
-    INSERT INTO History(usuarioCambio,tablaAfectada, accion, datosOriginales, datosActuales)VALUES('local', 'departamentos', 'INSERT', 'no existe', CONCAT('CODDEP= ', new.CODDEPARTAMENTO, ' Nombre= ', new.NOMBDEPARTAMENTO, ' Estado= ', new.ESTADO));
-ELSE
-	INSERT INTO History(usuarioCambio,tablaAfectada, accion, datosAnteriores, datosActuales)VALUES('local', 'departamentos', 'INSERT', 'nuevos datos', CONCAT('CODDEP= ', new.CODDEPARTAMENTO, ' Nombre= ', new.NOMBDEPARTAMENTO, ' Descripcion= ', new.DESCRIPCION, ' Estado= ', new.ESTADO));
-    END if;
-END
-$$
-DELIMITER ;
+(48, 'MANTENIMIENTO', 'DPTO de mantenimiento de software y hardware', 0),
+(49, 'MANTENIMIENTO DE EQUIPOS', 'SD', 1),
+(50, 'LIMPIEZA', NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -748,7 +815,8 @@ INSERT INTO `History` (`idHistory`, `usuarioCambio`, `accion`, `tablaAfectada`, 
 (7, 'local', 'DELETE', 'cargo', NULL, 'CODCARGO= 13 CODDEPARTAMENTO= 1 CARGO= AUXILIAR CONTABLE ESTADO= 1', 'no existe', '2022-11-30 14:52:52'),
 (8, 'local', 'INSERT', 'cargo', NULL, 'no existe', 'CODCARGO= 0 CODDEPARTAMENTO= 1 CARGO= Auxiliar ESTADO= 1', '2022-11-30 14:56:35'),
 (9, 'local', 'DELETE', 'cargo', NULL, 'CODCARGO= 14 CODDEPARTAMENTO= 1 CARGO= Auxiliar ESTADO= 1', 'no existe', '2022-11-30 14:56:59'),
-(10, 'local', 'INSERT', 'cargo', NULL, 'no existe', 'CODCARGO= 0 CODDEPARTAMENTO= 1 CARGO= Encargado ESTADO= 1', '2022-12-01 02:00:02');
+(10, 'local', 'INSERT', 'cargo', NULL, 'no existe', 'CODCARGO= 0 CODDEPARTAMENTO= 1 CARGO= Encargado ESTADO= 1', '2022-12-01 02:00:02'),
+(11, 'local', 'INSERT', 'departamentos', NULL, 'nuevos datos', 'CODDEP= 0 Nombre= MANTENIMIENTO DE EQUIPOS Descripcion= SD Estado= 1', '2022-12-06 20:20:01');
 
 -- --------------------------------------------------------
 
@@ -933,7 +1001,7 @@ CREATE TABLE `personal` (
 --
 
 INSERT INTO `personal` (`CODPERSONAL`, `CODITEM`, `CI`, `FECHAASIGNACION`, `FECHADESASIGNACION`, `ESTADO`) VALUES
-(1, '72551', '1111', '2022-02-02', '2022-04-04', 1),
+(1, '72551', '1111', '2022-02-02', '2022-04-04', 0),
 (2, '72552', '2222', '0000-00-00', '2022-02-02', 1),
 (3, '72553', '3333', '0000-00-00', '0000-00-00', 1),
 (4, '72554', '4444', '0000-00-00', '0000-00-00', 1),
@@ -1125,6 +1193,15 @@ CREATE TABLE `usuario` (
 -- --------------------------------------------------------
 
 --
+-- Structure for view `DB_VIEW_ActivoAll_view`
+--
+DROP TABLE IF EXISTS `DB_VIEW_ActivoAll_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `DB_VIEW_ActivoAll_view`  AS SELECT `tres`.`CLASE` AS `CLASE`, `tres`.`MARCA` AS `MARCA`, `tres`.`MODELO` AS `MODELO`, `procedencia`.`PROCEDENCIA` AS `PROCEDENCIA`, `activo`.`FOTOGRAFIA` AS `FOTOGRAFIA`, `activo`.`ANIOFABRICACION` AS `ANIOFABRICACION` FROM (((select `modelo`.`CODMODELO` AS `CODMODELO`,`modelo`.`CODMARCA` AS `CODMARCA`,`modelo`.`MODELO` AS `MODELO`,`dos`.`CLASE` AS `CLASE`,`dos`.`MARCA` AS `MARCA` from ((select `marca`.`CODMARCA` AS `CODMARCA`,`marca`.`CODCLASE` AS `CODCLASE`,`marca`.`MARCA` AS `MARCA`,`uno`.`CLASE` AS `CLASE` from ((select `claseactivo`.`CODCLASE` AS `CODCLASE`,`claseactivo`.`PARTIDA` AS `PARTIDA`,`claseactivo`.`CLASE` AS `CLASE`,`claseactivo`.`DESCRIPCIONCLASE` AS `DESCRIPCIONCLASE`,`claseactivo`.`ESTADO` AS `ESTADO` from `claseactivo`) `uno` join `marca`) where `uno`.`CODCLASE` = `marca`.`CODCLASE`) `dos` join `modelo`) where `modelo`.`CODMARCA` = `dos`.`CODMARCA`) `tres` join `activo`) join `procedencia`) WHERE `activo`.`CODMODELO` = `tres`.`CODMODELO` AND `activo`.`CODPROCEDENCIA` = `procedencia`.`CODPROCEDENCIA` ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `DB_VIEW_Activo_view`
 --
 DROP TABLE IF EXISTS `DB_VIEW_Activo_view`;
@@ -1134,11 +1211,29 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- --------------------------------------------------------
 
 --
+-- Structure for view `DB_VIEW_AsigCargoPersonalAll_view`
+--
+DROP TABLE IF EXISTS `DB_VIEW_AsigCargoPersonalAll_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `DB_VIEW_AsigCargoPersonalAll_view`  AS SELECT `asigcargopersonal`.`CODASIGCARGOPER` AS `CODASIGCARGOPER`, `asigcargopersonal`.`CODCARGODEP` AS `CODCARGODEP`, `asigcargopersonal`.`CODPERSONAL` AS `CODPERSONAL`, `asigcargopersonal`.`FECHAASIGNACION` AS `FECHAASIGNACION`, `asigcargopersonal`.`FECHACONCLUCION` AS `FECHACONCLUCION`, `asigcargopersonal`.`ESTADO` AS `ESTADO`, `asigcargopersonal`.`MEMODESIGNACION` AS `MEMODESIGNACION` FROM `asigcargopersonal` ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `DB_VIEW_AsigCargoPersonal_view`
 --
 DROP TABLE IF EXISTS `DB_VIEW_AsigCargoPersonal_view`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `DB_VIEW_AsigCargoPersonal_view`  AS SELECT `asigcargopersonal`.`CODASIGCARGOPER` AS `CODASIGCARGOPER`, `asigcargopersonal`.`CODCARGODEP` AS `CODCARGODEP`, `asigcargopersonal`.`CODPERSONAL` AS `CODPERSONAL`, `asigcargopersonal`.`FECHAASIGNACION` AS `FECHAASIGNACION`, `asigcargopersonal`.`FECHACONCLUCION` AS `FECHACONCLUCION`, `asigcargopersonal`.`ESTADO` AS `ESTADO`, `asigcargopersonal`.`MEMODESIGNACION` AS `MEMODESIGNACION`, `asigcargopersonal`.`FHREGSERV` AS `FHREGSERV` FROM `asigcargopersonal` WHERE `asigcargopersonal`.`ESTADO` = 1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `DB_VIEW_CargoAlll_view`
+--
+DROP TABLE IF EXISTS `DB_VIEW_CargoAlll_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `DB_VIEW_CargoAlll_view`  AS SELECT `cargo`.`CODCARGO` AS `CODCARGO`, `cargo`.`CODDEPARTAMENTO` AS `CODDEPARTAMENTO`, `cargo`.`CARGO` AS `CARGO`, `cargo`.`ESTADO` AS `ESTADO` FROM `cargo` ;
 
 -- --------------------------------------------------------
 
@@ -1170,6 +1265,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- --------------------------------------------------------
 
 --
+-- Structure for view `DB_VIEW_DepartamentosAll_view`
+--
+DROP TABLE IF EXISTS `DB_VIEW_DepartamentosAll_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `DB_VIEW_DepartamentosAll_view`  AS SELECT `departamentos`.`CODDEPARTAMENTO` AS `CODDEPARTAMENTO`, `departamentos`.`NOMBDEPARTAMENTO` AS `NOMBDEPARTAMENTO`, `departamentos`.`DESCRIPCION` AS `DESCRIPCION`, `departamentos`.`ESTADO` AS `ESTADO` FROM `departamentos` ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `DB_VIEW_Departamentos_view`
 --
 DROP TABLE IF EXISTS `DB_VIEW_Departamentos_view`;
@@ -1193,6 +1297,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 DROP TABLE IF EXISTS `DB_VIEW_Item_view`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `DB_VIEW_Item_view`  AS SELECT `item`.`CODITEM` AS `CODITEM`, `item`.`ESTADO` AS `ESTADO` FROM `item` WHERE `item`.`ESTADO` = '1' ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `DB_VIEW_PersonalAll_view`
+--
+DROP TABLE IF EXISTS `DB_VIEW_PersonalAll_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `DB_VIEW_PersonalAll_view`  AS SELECT `personal`.`CODPERSONAL` AS `CODPERSONAL`, `personal`.`CODITEM` AS `CODITEM`, `personal`.`CI` AS `CI`, `personal`.`FECHAASIGNACION` AS `FECHAASIGNACION`, `personal`.`FECHADESASIGNACION` AS `FECHADESASIGNACION`, `personal`.`ESTADO` AS `ESTADO` FROM `personal` ;
 
 -- --------------------------------------------------------
 
@@ -1431,7 +1544,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT for table `activo`
 --
 ALTER TABLE `activo`
-  MODIFY `CODACTIVO` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `CODACTIVO` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `asigcargopersonal`
@@ -1485,7 +1598,7 @@ ALTER TABLE `cronogramapreventivo`
 -- AUTO_INCREMENT for table `departamentos`
 --
 ALTER TABLE `departamentos`
-  MODIFY `CODDEPARTAMENTO` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `CODDEPARTAMENTO` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT for table `detallecronograma`
@@ -1503,7 +1616,7 @@ ALTER TABLE `detallemantenimiento`
 -- AUTO_INCREMENT for table `History`
 --
 ALTER TABLE `History`
-  MODIFY `idHistory` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `idHistory` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `informe`
